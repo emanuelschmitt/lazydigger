@@ -1,5 +1,4 @@
 import axios, { AxiosResponse, AxiosInstance, AxiosError } from "axios";
-import _get from "lodash/get";
 import qs from "query-string";
 
 import {
@@ -9,6 +8,7 @@ import {
 } from "./discogs-types";
 
 const DISCOGS_BASE_URL = `https://api.discogs.com/`;
+import logger from "../../logger";
 
 const delay = (ms: number) =>
   new Promise<void>((resolve) => {
@@ -38,7 +38,9 @@ export default class DiscogsClient {
       return this.httpClient.get<T>(path);
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 429) {
+        logger.debug("Discogs 429 reached. Waiting...");
         await delay(30 * 1000);
+        logger.debug("Discogs 429 reached. Resuming...");
         return this.getWithRetry<T>(path);
       }
       throw error;
