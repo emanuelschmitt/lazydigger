@@ -1,4 +1,3 @@
-import fs from "fs";
 
 import pinoms from "pino-multi-stream";
 

@@ -1,4 +1,5 @@
 import { Client } from "elasticsearch";
+
 import { ReleaseResponse } from "../discogs/discogs-types";
 
 const INDEX = "lazydigger";

@@ -1,11 +1,11 @@
-import express from "express";
 import { json } from "body-parser";
+import express from "express";
+import proxy from "express-http-proxy";
 
 import DiscogsClient from "./clients/discogs/discogs";
 import ElasticSearchClient from "./clients/elasticsearch/client";
-import { QueueService } from "./services/queue-service";
 import logger from "./logger";
-import proxy from "express-http-proxy";
+import { QueueService } from "./services/queue-service";
 
 const DISCOGS_TOKEN = "ThagzNtHYHptDqbzRxCsJCvCjCeFIgZuGTZROBej";
 const ELASTICSEARCH_HOST_URL = "http://localhost:9200";

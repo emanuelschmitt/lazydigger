@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon src/main.ts"
+    "dev": "nodemon src/main.ts",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --fix"
   },
   "dependencies": {
     "axios": "0.21.1",

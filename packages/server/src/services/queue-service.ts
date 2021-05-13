@@ -1,4 +1,5 @@
 import Bull, { Job, Queue } from "bull";
+
 import DiscogsClient from "../clients/discogs/discogs";
 import { SearchParameters } from "../clients/discogs/discogs-types";
 import ElasticSearchClient from "../clients/elasticsearch/client";

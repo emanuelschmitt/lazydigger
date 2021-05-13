@@ -1,14 +1,11 @@
-import axios, { AxiosResponse, AxiosInstance, AxiosError } from "axios";
-import qs from "query-string";
+import axios, { AxiosResponse, AxiosInstance, AxiosError } from 'axios';
+import { stringify } from 'query-string';
 
-import {
-  ReleaseResponse,
-  SearchParameters,
-  SearchResponse,
-} from "./discogs-types";
+import logger from '../../logger';
+
+import { ReleaseResponse, SearchParameters, SearchResponse } from './discogs-types';
 
 const DISCOGS_BASE_URL = `https://api.discogs.com/`;
-import logger from "../../logger";
 
 const delay = (ms: number) =>
   new Promise<void>((resolve) => {
@@ -38,9 +35,9 @@ export default class DiscogsClient {
       return this.httpClient.get<T>(path);
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 429) {
-        logger.debug("Discogs 429 reached. Waiting...");
+        logger.debug('Discogs 429 reached. Waiting...');
         await delay(30 * 1000);
-        logger.debug("Discogs 429 reached. Resuming...");
+        logger.debug('Discogs 429 reached. Resuming...');
         return this.getWithRetry<T>(path);
       }
       throw error;
@@ -51,30 +48,26 @@ export default class DiscogsClient {
     const data = await this.searchDatabase(search);
     const count = data?.pagination?.pages;
     if (!count) {
-      throw new Error("could not retrieve pagination count");
+      throw new Error('could not retrieve pagination count');
     }
     return count;
   }
 
-  public async searchDatabase(
-    search: SearchParameters
-  ): Promise<SearchResponse> {
-    const query = qs.stringify(search);
-    const response = await this.getWithRetry<SearchResponse>(
-      `/database/search?${query}`
-    );
+  public async searchDatabase(search: SearchParameters): Promise<SearchResponse> {
+    const query = stringify(search);
+    const response = await this.getWithRetry<SearchResponse>(`/database/search?${query}`);
     return response.data;
   }
 
   public async fetchImage(uri: string): Promise<ArrayBuffer> {
     const response = await axios.get<ArrayBuffer>(uri, {
-      responseType: "arraybuffer",
+      responseType: 'arraybuffer',
     });
     return response.data;
   }
 
   public async fetchRelease(id: number): Promise<ReleaseResponse> {
-    let response = await this.getWithRetry(`releases/${id}`);
+    const response = await this.getWithRetry(`releases/${id}`);
     return response.data;
   }
 }
