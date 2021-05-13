@@ -1,4 +1,9 @@
 import { Client } from "elasticsearch";
+import DiscogsClient from "./clients/discogs/discogs";
+import { QueueService } from "./services/queue-service";
+
+const DISCOGS_TOKEN = "ThagzNtHYHptDqbzRxCsJCvCjCeFIgZuGTZROBej";
+const REDIS_URL = "redis://127.0.0.1:6379";
 
 async function createIndexIfExists(client: Client, indexName: string) {
   const indexExists = await client.indices.exists({
@@ -15,15 +20,28 @@ async function createIndexIfExists(client: Client, indexName: string) {
 }
 
 async function main() {
-  const client = new Client({
+  const elasticSearchClient = new Client({
     hosts: ["http://localhost:9200"],
   });
-
-  await client.ping({
+  await elasticSearchClient.ping({
     requestTimeout: 30000,
   });
+  await createIndexIfExists(elasticSearchClient, "lazydigger.releases");
 
-  await createIndexIfExists(client, "lazydigger.releases");
+  const discogsClient = new DiscogsClient(DISCOGS_TOKEN);
+  const queueService = new QueueService({
+    url: REDIS_URL,
+    discogsClient,
+  })
+    .create()
+    .start();
+
+  queueService.createJob({
+    type: "FETCH_RELEASE",
+    params: {
+      releaseId: 34043,
+    },
+  });
 }
 
 main().catch((err) => console.error(err));

@@ -13,7 +13,7 @@ const prettyStream = pinoms.prettyStream({
 const logger = pinoms({
   streams: [
     { stream: prettyStream, level: "debug" },
-    { stream: fs.createWriteStream("logs"), level: "info" },
+    // { stream: fs.createWriteStream("logs"), level: "info" },
   ],
 });
 
