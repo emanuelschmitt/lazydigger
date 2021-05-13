@@ -1,6 +1,7 @@
 import Bull, { Job, Queue } from "bull";
 import DiscogsClient from "../clients/discogs/discogs";
 import { SearchParameters } from "../clients/discogs/discogs-types";
+import ElasticSearchClient from "../clients/elasticsearch/client";
 import logger from "../logger";
 
 type JobData =
@@ -25,16 +26,20 @@ export class QueueService {
   private url: string;
   private queue?: Queue<JobData>;
   private discogsClient: DiscogsClient;
+  private elasticSearchClient: ElasticSearchClient;
 
   constructor({
     discogsClient,
+    elasticSearchClient,
     url,
   }: {
     discogsClient: DiscogsClient;
+    elasticSearchClient: ElasticSearchClient;
     url: string;
   }) {
     this.url = url;
     this.discogsClient = discogsClient;
+    this.elasticSearchClient = elasticSearchClient;
   }
 
   create(): this {
@@ -83,7 +88,6 @@ export class QueueService {
               },
             });
           }
-          done();
         }
 
         if (data.type === "SEARCH_PAGE") {
@@ -96,16 +100,16 @@ export class QueueService {
               params: { releaseId: release.id },
             });
           }
-          done();
         }
 
         if (data.type === "FETCH_RELEASE") {
           const response = await this.discogsClient.fetchRelease(
             data.params.releaseId
           );
-          console.log("response", response);
-          done();
+          this.elasticSearchClient.indexRelease(response);
         }
+
+        done();
       } catch (error) {
         done(error);
       }

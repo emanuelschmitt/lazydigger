@@ -1,37 +1,22 @@
-import { Client } from "elasticsearch";
 import DiscogsClient from "./clients/discogs/discogs";
+import ElasticSearchClient from "./clients/elasticsearch/client";
 import { QueueService } from "./services/queue-service";
 
 const DISCOGS_TOKEN = "ThagzNtHYHptDqbzRxCsJCvCjCeFIgZuGTZROBej";
+const ELASTICSEARCH_HOST_URL = "http://localhost:9200";
 const REDIS_URL = "redis://127.0.0.1:6379";
-
-async function createIndexIfExists(client: Client, indexName: string) {
-  const indexExists = await client.indices.exists({
-    index: indexName,
-  });
-
-  if (indexExists) {
-    return;
-  }
-
-  await client.indices.create({
-    index: indexName,
-  });
-}
+const PORT = "8888";
 
 async function main() {
-  const elasticSearchClient = new Client({
-    hosts: ["http://localhost:9200"],
-  });
-  await elasticSearchClient.ping({
-    requestTimeout: 30000,
-  });
-  await createIndexIfExists(elasticSearchClient, "lazydigger.releases");
-
   const discogsClient = new DiscogsClient(DISCOGS_TOKEN);
+  const elasticSearchClient = new ElasticSearchClient(ELASTICSEARCH_HOST_URL);
+
+  await elasticSearchClient.createIndexIfNotExist();
+
   const queueService = new QueueService({
     url: REDIS_URL,
     discogsClient,
+    elasticSearchClient,
   })
     .create()
     .start();
@@ -40,7 +25,7 @@ async function main() {
     type: "SEARCH_PAGE_COUNT",
     params: {
       search: {
-        q: "Guy named",
+        q: "Traffic records",
         page: 1,
         per_page: 100,
       },
