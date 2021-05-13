@@ -2,6 +2,6 @@
   "execMap": {
     "ts": "ts-node -P tsconfig.json"
   },
-  "watch": ["./**/*"],
+  "watch": ["src/**/*"],
   "ext": "ts,tsx"
 }
