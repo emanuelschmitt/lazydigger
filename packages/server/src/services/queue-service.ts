@@ -1,27 +1,27 @@
-import Bull, { Job, Queue } from "bull";
+import Bull, { Job, Queue } from 'bull';
 
-import DiscogsClient from "../clients/discogs/discogs";
-import { SearchParameters } from "../clients/discogs/discogs-types";
-import ElasticSearchClient from "../clients/elasticsearch/client";
-import logger from "../logger";
+import DiscogsClient from '../clients/discogs/discogs';
+import { SearchParameters } from '../clients/discogs/discogs-types';
+import ElasticSearchClient from '../clients/elasticsearch/client';
+import logger from '../logger';
 
 type JobData =
   | {
-      type: "FETCH_RELEASE";
+      type: 'FETCH_RELEASE';
       params: { releaseId: number };
     }
   | {
-      type: "SEARCH_PAGE_COUNT";
+      type: 'SEARCH_PAGE_COUNT';
       params: { search: SearchParameters };
     }
   | {
-      type: "SEARCH_PAGE";
+      type: 'SEARCH_PAGE';
       params: { search: SearchParameters };
     };
 
-const QUEUE_NAME = "lazydigger";
+const QUEUE_NAME = 'lazydigger';
 
-const log = logger.child({ module: "queue-service" });
+const log = logger.child({ module: 'queue-service' });
 
 export class QueueService {
   private url: string;
@@ -51,15 +51,12 @@ export class QueueService {
       },
     });
 
-    this.queue.on("active", (job) => {
+    this.queue.on('active', (job) => {
       log.info(`Starting job ${job.id} of type ${job.data.type}`);
     });
 
-    this.queue.on("failed", (job) => {
-      log.info(
-        `Job ${job.id} of type ${job.data.type} failed.`,
-        job.stacktrace
-      );
+    this.queue.on('failed', (job) => {
+      log.info(`Job ${job.id} of type ${job.data.type} failed.`, job.stacktrace);
     });
 
     return this;
@@ -67,20 +64,18 @@ export class QueueService {
 
   start(): this {
     if (!this.queue) {
-      throw new Error("queue is not yet running. create queue before using");
+      throw new Error('queue is not yet running. create queue before using');
     }
 
     this.queue.process(1, async (job, done) => {
       try {
         const data = job.data;
 
-        if (data.type === "SEARCH_PAGE_COUNT") {
-          const pageCount = await this.discogsClient.getSearchPageCount(
-            data.params.search
-          );
+        if (data.type === 'SEARCH_PAGE_COUNT') {
+          const pageCount = await this.discogsClient.getSearchPageCount(data.params.search);
           for (let i = 1; i < pageCount + 1; i++) {
             this.createJob({
-              type: "SEARCH_PAGE",
+              type: 'SEARCH_PAGE',
               params: {
                 search: {
                   ...data.params.search,
@@ -91,22 +86,18 @@ export class QueueService {
           }
         }
 
-        if (data.type === "SEARCH_PAGE") {
-          const response = await this.discogsClient.searchDatabase(
-            data.params.search
-          );
+        if (data.type === 'SEARCH_PAGE') {
+          const response = await this.discogsClient.searchDatabase(data.params.search);
           for (const release of response.results) {
             await this.createJob({
-              type: "FETCH_RELEASE",
+              type: 'FETCH_RELEASE',
               params: { releaseId: release.id },
             });
           }
         }
 
-        if (data.type === "FETCH_RELEASE") {
-          const response = await this.discogsClient.fetchRelease(
-            data.params.releaseId
-          );
+        if (data.type === 'FETCH_RELEASE') {
+          const response = await this.discogsClient.fetchRelease(data.params.releaseId);
           this.elasticSearchClient.indexRelease(response);
         }
 
@@ -121,7 +112,7 @@ export class QueueService {
 
   createJob(jobData: JobData): Promise<Job<JobData>> {
     if (!this.queue) {
-      throw new Error("queue is not yet running. create queue before using");
+      throw new Error('queue is not yet running. create queue before using');
     }
     return this.queue.add(jobData);
   }

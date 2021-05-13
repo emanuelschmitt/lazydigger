@@ -1,8 +1,8 @@
-import { Client } from "elasticsearch";
+import { Client } from 'elasticsearch';
 
-import { ReleaseResponse } from "../discogs/discogs-types";
+import { ReleaseResponse } from '../discogs/discogs-types';
 
-const INDEX = "lazydigger";
+const INDEX = 'lazydigger';
 
 export default class ElasticSearchClient {
   private client: Client;
@@ -25,14 +25,14 @@ export default class ElasticSearchClient {
 
     await this.client.indices.putMapping({
       index: INDEX,
-      type: "release",
+      type: 'release',
       body: {
         properties: {
           genres: {
-            type: "keyword",
+            type: 'keyword',
           },
           styles: {
-            type: "keyword",
+            type: 'keyword',
           },
         },
       },
@@ -49,9 +49,9 @@ export default class ElasticSearchClient {
   public indexRelease(releaseData: ReleaseResponse) {
     const id = String(releaseData.id);
     return this.client.index({
-      index: "lazydigger",
+      index: 'lazydigger',
       id: id,
-      type: "release",
+      type: 'release',
       body: releaseData,
     });
   }

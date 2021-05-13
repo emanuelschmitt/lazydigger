@@ -35,7 +35,7 @@ export type SearchResult = {
   title: string;
   label: string[];
   master_id: number;
-  type: "release" | "master";
+  type: 'release' | 'master';
   format: string[];
   barcode: string[];
   master_url: string;
@@ -84,7 +84,7 @@ type Artist = {
 
 type Image = {
   uri: string;
-  type: "PRIMARY" | "SECONDARY";
+  type: 'PRIMARY' | 'SECONDARY';
 };
 
 type Label = {
@@ -93,7 +93,7 @@ type Label = {
   entity_type: string;
   resource_url: string;
   id: number;
-  entity_type_name: "label";
+  entity_type_name: 'label';
 };
 
 type Rating = {
