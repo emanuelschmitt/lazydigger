@@ -1,11 +1,31 @@
+import express from "express";
+import { json } from "body-parser";
+
 import DiscogsClient from "./clients/discogs/discogs";
 import ElasticSearchClient from "./clients/elasticsearch/client";
 import { QueueService } from "./services/queue-service";
+import logger from "./logger";
+import proxy from "express-http-proxy";
 
 const DISCOGS_TOKEN = "ThagzNtHYHptDqbzRxCsJCvCjCeFIgZuGTZROBej";
 const ELASTICSEARCH_HOST_URL = "http://localhost:9200";
+const ELASTIC_INDEX = "lazydigger";
 const REDIS_URL = "redis://127.0.0.1:6379";
 const PORT = "8888";
+
+function createServer() {
+  const app = express();
+
+  app.use(json());
+
+  app.use("/search", proxy(ELASTICSEARCH_HOST_URL + "/" + ELASTIC_INDEX));
+
+  app.listen(PORT, () => {
+    logger.info(`Express server listening on port ${PORT}`);
+  });
+
+  logger.info(`Server started at http://0.0.0.0:${PORT}`);
+}
 
 async function main() {
   const discogsClient = new DiscogsClient(DISCOGS_TOKEN);
@@ -31,6 +51,8 @@ async function main() {
       },
     },
   });
+
+  createServer();
 }
 
 main().catch((err) => console.error(err));
