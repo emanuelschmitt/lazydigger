@@ -60,14 +60,10 @@ export default class DiscogsClient {
     search: SearchParameters
   ): Promise<SearchResponse> {
     const query = qs.stringify(search);
-    try {
-      let response = await this.getWithRetry<SearchResponse>(
-        `/database/search?${query}`
-      );
-      return response.data;
-    } catch (err) {
-      throw err;
-    }
+    const response = await this.getWithRetry<SearchResponse>(
+      `/database/search?${query}`
+    );
+    return response.data;
   }
 
   public async fetchImage(uri: string): Promise<ArrayBuffer> {

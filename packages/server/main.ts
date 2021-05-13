@@ -37,9 +37,13 @@ async function main() {
     .start();
 
   queueService.createJob({
-    type: "FETCH_RELEASE",
+    type: "SEARCH_PAGE_COUNT",
     params: {
-      releaseId: 34043,
+      search: {
+        q: "Guy named",
+        page: 1,
+        per_page: 100,
+      },
     },
   });
 }

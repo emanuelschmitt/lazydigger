@@ -1,12 +1,25 @@
-import Bull, { Queue } from "bull";
+import Bull, { Job, Queue } from "bull";
 import DiscogsClient from "../clients/discogs/discogs";
+import { SearchParameters } from "../clients/discogs/discogs-types";
+import logger from "../logger";
 
-type JobData = {
-  type: "FETCH_RELEASE";
-  params: { releaseId: number };
-};
+type JobData =
+  | {
+      type: "FETCH_RELEASE";
+      params: { releaseId: number };
+    }
+  | {
+      type: "SEARCH_PAGE_COUNT";
+      params: { search: SearchParameters };
+    }
+  | {
+      type: "SEARCH_PAGE";
+      params: { search: SearchParameters };
+    };
 
 const QUEUE_NAME = "lazydigger";
+
+const log = logger.child({ module: "queue-service" });
 
 export class QueueService {
   private url: string;
@@ -27,7 +40,22 @@ export class QueueService {
   create(): this {
     this.queue = new Bull<JobData>(QUEUE_NAME, {
       redis: this.url,
+      defaultJobOptions: {
+        lifo: true, // We want the relases to be fetched first
+      },
     });
+
+    this.queue.on("active", (job) => {
+      log.info(`Starting job ${job.id} of type ${job.data.type}`);
+    });
+
+    this.queue.on("failed", (job) => {
+      log.info(
+        `Job ${job.id} of type ${job.data.type} failed.`,
+        job.stacktrace
+      );
+    });
+
     return this;
   }
 
@@ -36,26 +64,60 @@ export class QueueService {
       throw new Error("queue is not yet running. create queue before using");
     }
 
-    this.queue.process(async (job, done) => {
-      const { type, params } = job.data as JobData;
+    this.queue.process(1, async (job, done) => {
+      try {
+        const data = job.data;
 
-      if (type === "FETCH_RELEASE") {
-        const response = await this.discogsClient.fetchRelease(
-          params.releaseId
-        );
-        console.log("response", response);
-        done();
+        if (data.type === "SEARCH_PAGE_COUNT") {
+          const pageCount = await this.discogsClient.getSearchPageCount(
+            data.params.search
+          );
+          for (let i = 1; i < pageCount + 1; i++) {
+            this.createJob({
+              type: "SEARCH_PAGE",
+              params: {
+                search: {
+                  ...data.params.search,
+                  ...{ page: i },
+                },
+              },
+            });
+          }
+          done();
+        }
+
+        if (data.type === "SEARCH_PAGE") {
+          const response = await this.discogsClient.searchDatabase(
+            data.params.search
+          );
+          for (const release of response.results) {
+            await this.createJob({
+              type: "FETCH_RELEASE",
+              params: { releaseId: release.id },
+            });
+          }
+          done();
+        }
+
+        if (data.type === "FETCH_RELEASE") {
+          const response = await this.discogsClient.fetchRelease(
+            data.params.releaseId
+          );
+          console.log("response", response);
+          done();
+        }
+      } catch (error) {
+        done(error);
       }
     });
 
     return this;
   }
 
-  createJob(jobData: JobData): this {
+  createJob(jobData: JobData): Promise<Job<JobData>> {
     if (!this.queue) {
       throw new Error("queue is not yet running. create queue before using");
     }
-    this.queue.add(jobData);
-    return this;
+    return this.queue.add(jobData);
   }
 }
