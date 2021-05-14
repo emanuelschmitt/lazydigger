@@ -1,6 +1,6 @@
-import { json } from 'body-parser';
+import { text } from 'body-parser';
 import express from 'express';
-import proxy from 'express-http-proxy';
+import proxy, { createProxyMiddleware } from 'http-proxy-middleware';
 
 import DiscogsClient from './clients/discogs/discogs';
 import ElasticSearchClient from './clients/elasticsearch/client';
@@ -13,11 +13,32 @@ const ELASTIC_INDEX = 'lazydigger';
 const REDIS_URL = 'redis://127.0.0.1:6379';
 const PORT = '8888';
 
+const options: proxy.Options = {
+  target: ELASTICSEARCH_HOST_URL,
+  changeOrigin: true,
+  onProxyReq: (proxyReq, req) => {
+      // proxyReq.setHeader(
+      //     'Authorization',
+      //     `Basic ${btoa('cf7QByt5e:d2d60548-82a9-43cc-8b40-93cbbe75c34c')}`
+      // );
+      /* transform the req body back from text */
+      const { body } = req;
+      if (body) {
+          if (typeof body === 'object') {
+              proxyReq.write(JSON.stringify(body));
+          } else {
+              proxyReq.write(body);
+          }
+      }
+  }
+}
+
 function createServer() {
   const app = express();
 
-  app.use(json());
-  app.use('/search', proxy(ELASTICSEARCH_HOST_URL + '/' + ELASTIC_INDEX));
+  app.use(text({ type: 'application/x-ndjson' }));
+
+  app.use('*', createProxyMiddleware(options));
 
   app.listen(PORT, () => {
     logger.info(`Express server listening on port ${PORT}`);
@@ -28,7 +49,7 @@ function createServer() {
 
 async function main() {
   const discogsClient = new DiscogsClient(DISCOGS_TOKEN);
-  const elasticSearchClient = new ElasticSearchClient(ELASTICSEARCH_HOST_URL);
+  const elasticSearchClient = new ElasticSearchClient(ELASTICSEARCH_HOST_URL, ELASTIC_INDEX);
 
   await elasticSearchClient.createIndexIfNotExist();
 
@@ -44,7 +65,7 @@ async function main() {
     type: 'SEARCH_PAGE_COUNT',
     params: {
       search: {
-        q: 'Traffic records',
+        q: 'Roman Flügel',
         page: 1,
         per_page: 100,
       },

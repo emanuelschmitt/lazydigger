@@ -55,8 +55,8 @@ export class QueueService {
       log.info(`Starting job ${job.id} of type ${job.data.type}`);
     });
 
-    this.queue.on('failed', (job) => {
-      log.info(`Job ${job.id} of type ${job.data.type} failed.`, job.stacktrace);
+    this.queue.on('failed', (job, error) => {
+      log.info(`Job ${job.id} of type ${job.data.type} failed. ${error}`, job.stacktrace, error);
     });
 
     return this;
@@ -98,7 +98,7 @@ export class QueueService {
 
         if (data.type === 'FETCH_RELEASE') {
           const response = await this.discogsClient.fetchRelease(data.params.releaseId);
-          this.elasticSearchClient.indexRelease(response);
+          await this.elasticSearchClient.indexRelease(response);
         }
 
         done();

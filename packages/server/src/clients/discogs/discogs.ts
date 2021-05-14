@@ -34,6 +34,7 @@ export default class DiscogsClient {
     try {
       return this.httpClient.get<T>(path);
     } catch (error) {
+      console.log('httperror', error);
       if (isAxiosError(error) && error.response?.status === 429) {
         logger.debug('Discogs 429 reached. Waiting...');
         await delay(30 * 1000);

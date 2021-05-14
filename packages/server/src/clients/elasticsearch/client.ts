@@ -6,25 +6,28 @@ const INDEX = 'lazydigger';
 
 export default class ElasticSearchClient {
   private client: Client;
-  constructor(host: string) {
+  private index: string;
+
+  constructor(host: string, index: string) {
     this.client = new Client({
       hosts: [host],
     });
+    this.index = index;
   }
 
   public async createIndexIfNotExist() {
     const indexExists = await this.client.indices.exists({
-      index: INDEX,
+      index: this.index,
     });
 
     if (!indexExists) {
       await this.client.indices.create({
-        index: INDEX,
+        index: this.index,
       });
     }
 
     await this.client.indices.putMapping({
-      index: INDEX,
+      index: this.index,
       type: 'release',
       body: {
         properties: {
@@ -33,6 +36,9 @@ export default class ElasticSearchClient {
           },
           styles: {
             type: 'keyword',
+          },
+          country: {
+            type: 'keyword'
           },
         },
       },
@@ -49,7 +55,7 @@ export default class ElasticSearchClient {
   public indexRelease(releaseData: ReleaseResponse) {
     const id = String(releaseData.id);
     return this.client.index({
-      index: 'lazydigger',
+      index: this.index,
       id: id,
       type: 'release',
       body: releaseData,
