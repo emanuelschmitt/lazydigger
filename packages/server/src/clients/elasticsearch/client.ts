@@ -1,8 +1,6 @@
 import { Client } from 'elasticsearch';
 
-import { ReleaseResponse } from '../discogs/discogs-types';
-
-const INDEX = 'lazydigger';
+import { Release } from '../../utils';
 
 export default class ElasticSearchClient {
   private client: Client;
@@ -38,7 +36,7 @@ export default class ElasticSearchClient {
             type: 'keyword',
           },
           country: {
-            type: 'keyword'
+            type: 'keyword',
           },
         },
       },
@@ -52,7 +50,7 @@ export default class ElasticSearchClient {
     });
   }
 
-  public indexRelease(releaseData: ReleaseResponse) {
+  public indexRelease(releaseData: Release) {
     const id = String(releaseData.id);
     return this.client.index({
       index: this.index,

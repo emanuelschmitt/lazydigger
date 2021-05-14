@@ -6,7 +6,7 @@ import {
   ReactiveList,
   SingleDropdownList,
   DynamicRangeSlider,
-  SelectedFilters
+  SelectedFilters,
 } from '@appbaseio/reactivesearch';
 
 function App() {
@@ -19,7 +19,7 @@ function App() {
         URLParams
         title="Genres"
         react={{
-          and: ['Styles', 'Country', 'RatingAverage'],
+          and: ['Styles', 'Country', 'RatingAverage', 'Rareness', 'Price'],
         }}
       />
       <MultiDropdownList
@@ -29,7 +29,7 @@ function App() {
         URLParams
         title="Styles"
         react={{
-          and: ['Genre', 'Country', 'RatingAverage'],
+          and: ['Genre', 'Country', 'RatingAverage', 'Rareness', 'Price'],
         }}
         showFilter
       />
@@ -40,33 +40,23 @@ function App() {
         URLParams
         title="Country"
         react={{
-          and: ['Styles', 'Genre', 'RatingAverage'],
+          and: ['Genre', 'Styles', 'RatingAverage', 'Rareness', 'Price'],
         }}
       />
       <RangeSlider
         componentId="RatingAverage"
-        dataField="community.rating.average"
+        dataField="averageRating"
         title="Average Rating"
         range={{
           start: 0,
-          end: 5,
+          end: 500,
+        }}
+        react={{
+          and: ['Genre', 'Styles', 'Country', 'Rareness', 'Price'],
         }}
       />
-      {/* <DynamicRangeSlider
-        componentId="Want"
-        dataField="community.want"
-        title="Want"
-      />
-      <DynamicRangeSlider
-        componentId="Have"
-        dataField="community.have"
-        title="Have"
-      /> */}
-      <DynamicRangeSlider
-        componentId="Price"
-        dataField="lowest_price"
-        title="Price"
-      />
+      <DynamicRangeSlider componentId="Rareness" dataField="rareness" title="Rareness" />
+      <DynamicRangeSlider componentId="Price" dataField="lowest_price" title="Price" />
       <SelectedFilters />
       <ReactiveList
         componentId="SearchResult"
@@ -82,7 +72,7 @@ function App() {
           </div>
         )}
         react={{
-          and: ['Genre', 'Styles', 'Country', 'RatingAverage', 'Want', 'Have', 'Price'],
+          and: ['Genre', 'Styles', 'Country', 'RatingAverage', 'Rareness', 'Price'],
         }}
       />
     </ReactiveBase>

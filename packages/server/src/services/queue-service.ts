@@ -4,6 +4,7 @@ import DiscogsClient from '../clients/discogs/discogs';
 import { SearchParameters } from '../clients/discogs/discogs-types';
 import ElasticSearchClient from '../clients/elasticsearch/client';
 import logger from '../logger';
+import { responseToRelease } from '../utils';
 
 type JobData =
   | {
@@ -98,7 +99,8 @@ export class QueueService {
 
         if (data.type === 'FETCH_RELEASE') {
           const response = await this.discogsClient.fetchRelease(data.params.releaseId);
-          await this.elasticSearchClient.indexRelease(response);
+          const release = responseToRelease(response);
+          await this.elasticSearchClient.indexRelease(release);
         }
 
         done();
