@@ -1,7 +1,7 @@
 import Bull, { Job, Queue } from 'bull';
 
 import DiscogsClient from '../clients/discogs/discogs';
-import { SearchParameters } from '../clients/discogs/discogs-types';
+import { ReleaseResponse, SearchParameters, SearchResult } from '../clients/discogs/discogs-types';
 import ElasticSearchClient from '../clients/elasticsearch/client';
 import logger from '../logger';
 import { responseToRelease } from '../utils';
@@ -23,6 +23,13 @@ type JobData =
 const QUEUE_NAME = 'lazydigger';
 
 const log = logger.child({ module: 'queue-service' });
+
+function shouldFetchRelease(result: SearchResult): boolean {
+  return result.community.have >= 50;
+}
+function shouldIndexRelease(release: ReleaseResponse): boolean {
+  return release.community.rating.average >= 4;
+}
 
 export class QueueService {
   private url: string;
@@ -90,8 +97,8 @@ export class QueueService {
         if (data.type === 'SEARCH_PAGE') {
           const response = await this.discogsClient.searchDatabase(data.params.search);
           for (const release of response.results) {
-            if (release.community.have < 50) {
-              return;
+            if (!shouldFetchRelease(release)) {
+              continue;
             }
             await this.createJob({
               type: 'FETCH_RELEASE',
@@ -102,6 +109,12 @@ export class QueueService {
 
         if (data.type === 'FETCH_RELEASE') {
           const response = await this.discogsClient.fetchRelease(data.params.releaseId);
+
+          if (!shouldIndexRelease(response)) {
+            done();
+            return;
+          }
+
           const release = responseToRelease(response);
           await this.elasticSearchClient.indexRelease(release);
         }

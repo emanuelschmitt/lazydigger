@@ -5,6 +5,7 @@ import logger from '../../logger';
 
 import { ReleaseResponse, SearchParameters, SearchResponse } from './discogs-types';
 
+const log = logger.child({ module: 'discogs-client' });
 const DISCOGS_BASE_URL = `https://api.discogs.com/`;
 
 const delay = (ms: number) =>
@@ -34,11 +35,10 @@ export default class DiscogsClient {
     try {
       return this.httpClient.get<T>(path);
     } catch (error) {
-      console.log('httperror', error);
       if (isAxiosError(error) && error.response?.status === 429) {
-        logger.debug('Discogs 429 reached. Waiting...');
+        log.debug('Discogs 429 reached. Waiting...');
         await delay(30 * 1000);
-        logger.debug('Discogs 429 reached. Resuming...');
+        log.debug('Discogs 429 reached. Resuming...');
         return this.getWithRetry<T>(path);
       }
       throw error;
@@ -69,7 +69,7 @@ export default class DiscogsClient {
 
   public async fetchRelease(id: number): Promise<ReleaseResponse> {
     const response = await this.getWithRetry(`releases/${id}`);
-    logger.debug(`Fetched release with code ${response.status}`);
+    log.debug(`Fetched release with code ${response.status}`);
     return response.data;
   }
 }
