@@ -25,6 +25,8 @@ const configuration = {
   PORT: process.env.PORT,
 };
 
+console.log(process.env);
+
 for (const [key, value] of Object.entries(configuration)) {
   if (!value) {
     throw new Error(`configuration ${key} is missing`);
