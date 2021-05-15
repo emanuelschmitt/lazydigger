@@ -80,6 +80,7 @@ function App() {
                 componentId="RatingAverage"
                 dataField="averageRating"
                 title="Average Rating"
+                URLParams
                 range={{
                   start: 0,
                   end: 500,
@@ -94,6 +95,7 @@ function App() {
                 componentId="Rareness"
                 dataField="rareness"
                 title="Rareness"
+                URLParams
                 react={{
                   and: ['Genre', 'Styles', 'Country', 'Price', 'RatingAverage'],
                 }}
@@ -104,6 +106,7 @@ function App() {
                 title="Price"
                 componentId="Price"
                 dataField="lowest_price"
+                URLParams
                 react={{
                   and: ['Genre', 'Styles', 'Country', 'Rareness', 'RatingAverage'],
                 }}
@@ -114,6 +117,7 @@ function App() {
                 componentId="Year"
                 dataField="year"
                 title="Year"
+                URLParams
                 range={{
                   start: 1920,
                   end: new Date().getFullYear(),
