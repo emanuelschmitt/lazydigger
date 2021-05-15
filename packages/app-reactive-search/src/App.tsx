@@ -7,7 +7,6 @@ import {
   SingleDropdownList,
   DynamicRangeSlider,
   SelectedFilters,
-  RangeInput,
 } from '@appbaseio/reactivesearch';
 
 function App() {
