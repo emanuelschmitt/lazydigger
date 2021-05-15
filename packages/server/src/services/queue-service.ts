@@ -90,6 +90,9 @@ export class QueueService {
         if (data.type === 'SEARCH_PAGE') {
           const response = await this.discogsClient.searchDatabase(data.params.search);
           for (const release of response.results) {
+            if (release.community.have < 50) {
+              return;
+            }
             await this.createJob({
               type: 'FETCH_RELEASE',
               params: { releaseId: release.id },

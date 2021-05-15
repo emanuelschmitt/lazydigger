@@ -1,9 +1,11 @@
-import { text } from 'body-parser';
+import { json, text } from 'body-parser';
+import { errors } from 'celebrate';
 import express from 'express';
 import proxy, { createProxyMiddleware } from 'http-proxy-middleware';
 
 import DiscogsClient from './clients/discogs/discogs';
 import ElasticSearchClient from './clients/elasticsearch/client';
+import SearchJobController from './controller/search-job-controller';
 import logger from './logger';
 import { QueueService } from './services/queue-service';
 
@@ -17,34 +19,39 @@ const options: proxy.Options = {
   target: ELASTICSEARCH_HOST_URL,
   changeOrigin: true,
   onProxyReq: (proxyReq, req) => {
-      // proxyReq.setHeader(
-      //     'Authorization',
-      //     `Basic ${btoa('cf7QByt5e:d2d60548-82a9-43cc-8b40-93cbbe75c34c')}`
-      // );
-      /* transform the req body back from text */
-      const { body } = req;
-      if (body) {
-          if (typeof body === 'object') {
-              proxyReq.write(JSON.stringify(body));
-          } else {
-              proxyReq.write(body);
-          }
+    const { body } = req;
+    if (body) {
+      if (typeof body === 'object') {
+        proxyReq.write(JSON.stringify(body));
+      } else {
+        proxyReq.write(body);
       }
-  }
+    }
+  },
+};
+
+function createAPIRouter({ queueService }: { queueService: QueueService }) {
+  const router = express.Router();
+
+  router.use(SearchJobController.basePath, new SearchJobController({ queueService }).router);
+
+  return router;
 }
 
-function createServer() {
+function createServer({ queueService }: { queueService: QueueService }) {
   const app = express();
 
+  app.use(json());
   app.use(text({ type: 'application/x-ndjson' }));
 
-  app.use('*', createProxyMiddleware(options));
+  app.use('/api', createAPIRouter({ queueService }));
+  app.use('/*', createProxyMiddleware(options)); // proxy for elastic search
+
+  app.use(errors());
 
   app.listen(PORT, () => {
     logger.info(`Express server listening on port ${PORT}`);
   });
-
-  logger.info(`Server started at http://0.0.0.0:${PORT}`);
 }
 
 async function main() {
@@ -61,18 +68,7 @@ async function main() {
     .create()
     .start();
 
-  queueService.createJob({
-    type: 'SEARCH_PAGE_COUNT',
-    params: {
-      search: {
-        q: 'Roman Flügel',
-        page: 1,
-        per_page: 100,
-      },
-    },
-  });
-
-  createServer();
+  createServer({ queueService });
 }
 
 main().catch((err) => console.error(err));

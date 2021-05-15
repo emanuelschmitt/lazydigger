@@ -69,6 +69,7 @@ export default class DiscogsClient {
 
   public async fetchRelease(id: number): Promise<ReleaseResponse> {
     const response = await this.getWithRetry(`releases/${id}`);
+    logger.debug(`Fetched release with code ${response.status}`);
     return response.data;
   }
 }

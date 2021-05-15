@@ -7,6 +7,7 @@ import {
   SingleDropdownList,
   DynamicRangeSlider,
   SelectedFilters,
+  RangeInput,
 } from '@appbaseio/reactivesearch';
 
 function App() {
@@ -68,7 +69,19 @@ function App() {
             }}
           />
           <DynamicRangeSlider componentId="Rareness" dataField="rareness" title="Rareness" />
-          <DynamicRangeSlider componentId="Price" dataField="lowest_price" title="Price" />
+          <DynamicRangeSlider title="Price" componentId="Price" dataField="lowest_price" />
+          <RangeSlider
+            componentId="Year"
+            dataField="year"
+            title="Year"
+            range={{
+              start: 1920,
+              end: new Date().getFullYear(),
+            }}
+            react={{
+              and: ['Genre', 'Styles', 'Country', 'Rareness', 'Price'],
+            }}
+          />
         </div>
         <div
           style={{
