@@ -11,7 +11,7 @@ WORKDIR /usr/src/app
 
 COPY . .
 # Note that file with . are not copied
-COPY packages/app/.env.production ./packages/app/.env.production
+ADD packages/app/.env.production ./packages/app/.env.production
 ENV NODE_ENV production
 
 RUN yarn install --frozen-lockfile
