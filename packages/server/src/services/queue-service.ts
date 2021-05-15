@@ -21,6 +21,7 @@ type JobData =
     };
 
 const QUEUE_NAME = 'lazydigger';
+const CONCURRENCY = 2;
 
 const log = logger.child({ module: 'queue-service' });
 
@@ -28,7 +29,7 @@ function shouldFetchRelease(result: SearchResult): boolean {
   return result.community.have >= 50;
 }
 function shouldIndexRelease(release: ReleaseResponse): boolean {
-  return release.community.rating.average >= 4;
+  return release.community.rating.average >= 4 && release.community.rating.count >= 10;
 }
 
 export class QueueService {
@@ -75,7 +76,7 @@ export class QueueService {
       throw new Error('queue is not yet running. create queue before using');
     }
 
-    this.queue.process(1, async (job, done) => {
+    this.queue.process(CONCURRENCY, async (job, done) => {
       try {
         const data = job.data;
 

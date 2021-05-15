@@ -33,8 +33,9 @@ export default class DiscogsClient {
 
   private async getWithRetry<T = any>(path: string): Promise<AxiosResponse<T>> {
     try {
-      return this.httpClient.get<T>(path);
+      return await this.httpClient.get<T>(path);
     } catch (error) {
+      log.debug('Error while fetching. Waiting...', error);
       if (isAxiosError(error) && error.response?.status === 429) {
         log.debug('Discogs 429 reached. Waiting...');
         await delay(30 * 1000);
