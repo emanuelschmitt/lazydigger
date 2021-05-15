@@ -5,18 +5,13 @@ import proxy, { createProxyMiddleware } from 'http-proxy-middleware';
 
 import DiscogsClient from './clients/discogs/discogs';
 import ElasticSearchClient from './clients/elasticsearch/client';
+import configuration from './configuration';
 import SearchJobController from './controller/search-job-controller';
 import logger from './logger';
 import { QueueService } from './services/queue-service';
 
-const DISCOGS_TOKEN = 'ThagzNtHYHptDqbzRxCsJCvCjCeFIgZuGTZROBej';
-const ELASTICSEARCH_HOST_URL = 'http://localhost:9200';
-const ELASTIC_INDEX = 'lazydigger';
-const REDIS_URL = 'redis://127.0.0.1:6379';
-const PORT = '8888';
-
 const options: proxy.Options = {
-  target: ELASTICSEARCH_HOST_URL,
+  target: configuration.ELASTICSEARCH_HOST_URL,
   changeOrigin: true,
   onProxyReq: (proxyReq, req) => {
     const { body } = req;
@@ -49,19 +44,22 @@ function createServer({ queueService }: { queueService: QueueService }) {
 
   app.use(errors());
 
-  app.listen(PORT, () => {
-    logger.info(`Express server listening on port ${PORT}`);
+  app.listen(configuration.PORT, () => {
+    logger.info(`Express server listening on port ${configuration.PORT}`);
   });
 }
 
 async function main() {
-  const discogsClient = new DiscogsClient(DISCOGS_TOKEN);
-  const elasticSearchClient = new ElasticSearchClient(ELASTICSEARCH_HOST_URL, ELASTIC_INDEX);
+  const discogsClient = new DiscogsClient(configuration.DISCOGS_TOKEN);
+  const elasticSearchClient = new ElasticSearchClient(
+    configuration.ELASTICSEARCH_HOST_URL,
+    configuration.ELASTIC_INDEX,
+  );
 
   await elasticSearchClient.createIndexIfNotExist();
 
   const queueService = new QueueService({
-    url: REDIS_URL,
+    url: configuration.REDIS_URL,
     discogsClient,
     elasticSearchClient,
   })
