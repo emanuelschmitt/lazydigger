@@ -23,7 +23,7 @@ import {
 
 function App() {
   return (
-    <ReactiveBase url={process.env.REACT_APP_ELASTIC_URL} app="lazydigger">
+    <ReactiveBase url={process.env.REACT_APP_ELASTICSEARCH_URL} app="lazydigger">
       <div
         style={{
           display: 'flex',
@@ -34,7 +34,7 @@ function App() {
           style={{
             maxWidth: 400,
             padding: '32px',
-            background: '#ddd',
+            borderRight: '1px solid #ddd',
           }}
         >
           <Grid container spacing={2}>
