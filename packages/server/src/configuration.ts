@@ -19,7 +19,7 @@ dotenv.config({ path: path });
 
 const configuration = {
   DISCOGS_TOKEN: process.env.DISCOGS_TOKEN,
-  ELASTICSEARCH_HOST_URL: process.env.ELASTICSEARCH_HOST_URL,
+  ELASTICSEARCH_URL: process.env.ELASTICSEARCH_HOST_URL,
   ELASTIC_INDEX: process.env.ELASTIC_INDEX,
   REDIS_URL: process.env.REDIS_URL,
   PORT: process.env.PORT,

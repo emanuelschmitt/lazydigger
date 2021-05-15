@@ -12,7 +12,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 RUN yarn install --frozen-lockfile
-RUN yarn workspace app-reactive-search build
+RUN yarn workspace app build
 
 WORKDIR ./packages/server
 

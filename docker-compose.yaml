@@ -1,4 +1,4 @@
-version: "2.2"
+version: '2.2'
 
 services:
   elasticsearch:
@@ -10,11 +10,10 @@ services:
       - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
-
   redis:
     image: redis:6.2.3
     ports:
-      - "6379:6379"
+      - '6379:6379'
 
 volumes:
   elasticsearch-data:

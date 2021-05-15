@@ -13,7 +13,7 @@ import logger from './logger';
 import { QueueService } from './services/queue-service';
 
 const options: proxy.Options = {
-  target: configuration.ELASTICSEARCH_HOST_URL,
+  target: configuration.ELASTICSEARCH_URL,
   changeOrigin: true,
   onProxyReq: (proxyReq, req) => {
     const { body } = req;
@@ -54,10 +54,7 @@ function createServer({ queueService }: { queueService: QueueService }) {
 
 async function main() {
   const discogsClient = new DiscogsClient(configuration.DISCOGS_TOKEN);
-  const elasticSearchClient = new ElasticSearchClient(
-    configuration.ELASTICSEARCH_HOST_URL,
-    configuration.ELASTIC_INDEX,
-  );
+  const elasticSearchClient = new ElasticSearchClient(configuration.ELASTICSEARCH_URL, configuration.ELASTIC_INDEX);
 
   await elasticSearchClient.createIndexIfNotExist();
 
