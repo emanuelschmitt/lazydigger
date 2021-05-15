@@ -10,13 +10,13 @@ RUN apt-get update && apt-get install yarn --yes
 WORKDIR /usr/src/app
 
 COPY . .
+ENV NODE_ENV production
 
 RUN yarn install --frozen-lockfile
 RUN yarn workspace app build
 
 WORKDIR ./packages/server
 
-ENV NODE_ENV production
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
 ENV TS_NODE_TRANSPILE_ONLY 1
