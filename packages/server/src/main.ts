@@ -1,6 +1,8 @@
+import path from 'path';
+
 import { json, text } from 'body-parser';
 import { errors } from 'celebrate';
-import express from 'express';
+import express, { static as statics } from 'express';
 import proxy, { createProxyMiddleware } from 'http-proxy-middleware';
 
 import DiscogsClient from './clients/discogs/discogs';
@@ -38,6 +40,7 @@ function createServer({ queueService }: { queueService: QueueService }) {
 
   app.use(json());
   app.use(text({ type: 'application/x-ndjson' }));
+  app.use(statics(path.resolve(__dirname, '../../app/build')));
 
   app.use('/api', createAPIRouter({ queueService }));
   app.use('/*', createProxyMiddleware(options)); // proxy for elastic search

@@ -23,7 +23,7 @@ import {
 
 function App() {
   return (
-    <ReactiveBase url="http://localhost:3000" app="lazydigger">
+    <ReactiveBase url={process.env.REACT_APP_ELASTIC_URL} app="lazydigger">
       <div
         style={{
           display: 'flex',
