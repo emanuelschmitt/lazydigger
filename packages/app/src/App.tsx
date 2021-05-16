@@ -21,6 +21,8 @@ import {
   Link,
 } from '@material-ui/core';
 
+const PAGE_SIZE = 25;
+
 function App() {
   return (
     <ReactiveBase url={process.env.REACT_APP_ELASTICSEARCH_URL} app="lazydigger">
@@ -147,7 +149,7 @@ function App() {
                   pagination
                   URLParams
                   showResultStats={false}
-                  size={25}
+                  size={PAGE_SIZE}
                   render={(data) => {
                     return (
                       <TableContainer>
@@ -193,13 +195,13 @@ function App() {
                   renderNoResults={() => null}
                   renderPagination={({ totalPages, currentPage, setPage }) => (
                     <TablePagination
-                      count={totalPages * 10}
-                      rowsPerPage={10}
+                      count={totalPages * PAGE_SIZE}
+                      rowsPerPage={PAGE_SIZE}
                       page={currentPage}
                       onChangePage={(_, value) => {
                         setPage(value);
                       }}
-                      rowsPerPageOptions={[10]}
+                      rowsPerPageOptions={[PAGE_SIZE]}
                       component="div"
                     />
                   )}
