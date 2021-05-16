@@ -10,7 +10,7 @@ export type Release = Omit<
   | 'released_formatted'
   | 'tracklist'
   | 'identifiers'
-  | 'formats'
+  | 'status'
 > & {
   rareness: number; // ratio between want and have
   price: number; // lowest_price multiplied by 100 for eleastic search
@@ -31,7 +31,7 @@ export function responseToRelease(response: ReleaseResponse): Release {
     released_formatted,
     tracklist,
     identifiers,
-    formats,
+    status,
     ...rest
   } = response;
   return {
