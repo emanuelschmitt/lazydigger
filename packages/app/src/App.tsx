@@ -46,7 +46,7 @@ function App() {
                 URLParams
                 title="Genres"
                 react={{
-                  and: ['Styles', 'Country', 'RatingAverage', 'Rareness', 'Price', 'RatingAverage'],
+                  and: ['Styles', 'Country', 'RatingAverage', 'Rareness', 'Price', 'RatingAverage', 'Year'],
                 }}
               />
             </Grid>
@@ -58,7 +58,7 @@ function App() {
                 URLParams
                 title="Styles"
                 react={{
-                  and: ['Genre', 'Country', 'RatingAverage', 'Rareness', 'Price', 'RatingAverage'],
+                  and: ['Genre', 'Country', 'RatingAverage', 'Rareness', 'Price', 'RatingAverage', 'Year'],
                 }}
                 showFilter
               />
@@ -71,7 +71,7 @@ function App() {
                 URLParams
                 title="Country"
                 react={{
-                  and: ['Genre', 'Styles', 'RatingAverage', 'Rareness', 'Price', 'RatingAverage'],
+                  and: ['Genre', 'Styles', 'RatingAverage', 'Rareness', 'Price', 'RatingAverage', 'Year'],
                 }}
               />
             </Grid>
@@ -86,7 +86,7 @@ function App() {
                   end: 500,
                 }}
                 react={{
-                  and: ['Genre', 'Styles', 'Country', 'Rareness', 'Price'],
+                  and: ['Genre', 'Styles', 'Country', 'Rareness', 'Price', 'Year'],
                 }}
               />
             </Grid>
@@ -97,7 +97,7 @@ function App() {
                 title="Rareness"
                 URLParams
                 react={{
-                  and: ['Genre', 'Styles', 'Country', 'Price', 'RatingAverage'],
+                  and: ['Genre', 'Styles', 'Country', 'Price', 'RatingAverage', 'Year'],
                 }}
               />
             </Grid>
@@ -108,7 +108,7 @@ function App() {
                 dataField="lowest_price"
                 URLParams
                 react={{
-                  and: ['Genre', 'Styles', 'Country', 'Rareness', 'RatingAverage'],
+                  and: ['Genre', 'Styles', 'Country', 'Rareness', 'RatingAverage', 'Year'],
                 }}
               />
             </Grid>
@@ -204,7 +204,7 @@ function App() {
                     />
                   )}
                   react={{
-                    and: ['Genre', 'Styles', 'Country', 'RatingAverage', 'Rareness', 'Price'],
+                    and: ['Genre', 'Styles', 'Country', 'RatingAverage', 'Rareness', 'Price', 'Year'],
                   }}
                 />
               </Paper>
